@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+        }
+
+        canvas {
+            display: block;
+        }
+
+        #myBox {
+            width: 60vw;
+            height: 80vh;
+            margin: 10vh auto;
+        }
+    </style>
+</head>
+
+<body>
+<div id="myBox"></div>
+<script src="../../node_modules/three/build/three.js"></script>
+<script src="../../node_modules/three/examples/js/controls/OrbitControls.js"></script>
+<script src="../../node_modules/three/examples/js/objects/Lensflare.js"></script>
+<script src="../../node_modules/three/examples/js/lines/LineSegments2.js"></script>
+<script src="../../node_modules/three/examples/js/lines/LineSegmentsGeometry.js"></script>
+
+<script src="../../node_modules/three/examples/js/lines/Line2.js"></script>
+<script src="../../node_modules/three/examples/js/lines/LineMaterial.js"></script>
+<script src="../../node_modules/three/examples/js/lines/LineGeometry.js"></script>
+<script type="module">
+    // import * as THREE from '../../node_modules/three/build/three.module.js';
+    // import { OrbitControls } from '../../node_modules/three/examples/js/controls/OrbitControls.js';
+    // import { Lensflare, LensflareElement } from '../../node_modules/three/examples/js/objects/Lensflare.js';
+    // import { Line2 } from '../../node_modules/three/examples/js/lines/Line2.js';
+    // import { LineMaterial } from '../../node_modules/three/examples/js/lines/LineMaterial.js';
+    // import { LineGeometry } from '../../node_modules/three/examples/js/lines/LineGeometry.js';
+
+
+    let { OrbitControls ,Lensflare, LensflareElement, Line2 , LineMaterial,LineGeometry } = THREE;
+
+
+    var Boxes = (function (THREE) {
+        'use strict';
+        var myObj = document.getElementById("myBox");
+        var spline = null;
+        var canvas = document.createElement('canvas');
+        var ctx = canvas.getContext('2d');
+        //
+        function Box(pos) {
+            this.vector = pos;
+            // this.texture = texture;
+            this.radius = {
+                x: 20,
+                y: 30,
+                z: 20
+            };
+            this.counter = 0;
+            this.axis = new THREE.Vector3();
+            this.up = new THREE.Vector3(0, 1, 0);
+            this.speed = 0.005 + Math.random() * 0.005;
+            this.mesh = null;
+        }
+        Box.prototype.init = function (scene) {
+
+
+            //球体
+            // this.mesh = new THREE.Mesh(
+            //     new THREE.SphereGeometry(2, 32, 32)
+            // , new THREE.MeshLambertMaterial({color: 0xffffff} ));
+            // this.mesh.position.set(this.vector.x, this.vector.y, this.vector.z);
+            // scene.add(this.mesh);
+
+
+            var textureLoader = new THREE.TextureLoader();
+
+            var textureFlare0 = textureLoader.load('./img/lensflare0.png'); //读取光晕图片像素作为贴图
+
+            var self = this;
+            addLight(0.995, 0.5, 0.9, 5000, 5000, - 1000); //点光源
+            function addLight(h, s, l, x, y, z) {
+
+                self.light = new THREE.PointLight(0xffffff, 1.5, 2000);
+                self.light.color.setHSL(h, s, l);
+                self.light.position.set(self.vector.x, self.vector.y, self.vector.z);
+                scene.add(self.light);
+
+                var lensflare = new Lensflare();
+                lensflare.addElement(new LensflareElement(textureFlare0, 80, 0, self.light.color));
+                self.light.add(lensflare); //点光源 加 光晕
+            }
+
+
+        }
+
+        function Point(pos) {
+            this.vector = new THREE.Vector3(pos.x, pos.y, pos.z);
+        }
+
+        function Spline(points) { //线条构造函数
+            this.points = points; // 线条节点
+            this.box = null
+            this.curve = null;
+        }
+
+        // 实例化一根线条 Spline（线条）
+        Spline.prototype.init = function (scene) {
+            var curve = new THREE.CatmullRomCurve3(); //catmull-rom 曲线, 卡穆尔隆曲线
+            var pointArr = [];
+            var colorArr = [];
+            this.points.forEach(function (point) { // this.points 是 连成线条的3个顶点，catmull-rom 可根据 这 3个顶点 生成一条线
+                curve.points.push(point.vector);
+            });
+            var geometry = new THREE.Geometry();
+            geometry.vertices = curve.getPoints(100); //将曲线分成 100段
+            var objArr = geometry.vertices;
+            for (var i=0; i<objArr.length; i++) {
+                pointArr.push(objArr[i].x);
+                pointArr.push(objArr[i].y);
+                pointArr.push(objArr[i].z);
+                colorArr.push(0);
+                colorArr.push(0);
+                colorArr.push(1);
+            }
+            var geometry1 = new LineGeometry();
+            geometry1.setColors(colorArr);//蓝色，插值也是蓝色
+            geometry1.setPositions(pointArr);
+
+
+            var matLine = new LineMaterial({
+                color: 0xffffff,
+                linewidth: 10, // in pixels
+                vertexColors: THREE.VertexColors, //顶点颜色
+                //resolution:  // to be set by renderer, eventually
+                // dashed: true
+            });
+            matLine.resolution.set(width,height);
+            var splineObject = new Line2(geometry1, matLine);
+            scene.add(splineObject);
+
+
+
+            //3个发光点
+            this.box = new Box(this.points[0].vector);
+            this.box.init(scene);
+            this.box1 = new Box(this.points[0].vector);
+            this.box1.init(scene);
+            this.curve = curve;
+            this.box2 = new Box(this.points[0].vector);
+            this.box2.init(scene);
+            this.curve = curve;
+
+
+
+
+        };
+        Spline.prototype.update = function () {
+            var box = this.box;
+            if (box.counter < 1) {
+                box.light.position.copy(this.curve.getPointAt(box.counter));
+                box.counter += box.speed;
+            } else {
+                box.counter = 0;
+            }
+
+
+
+            var box1 = this.box1;
+            if (box1.counter < 1) {
+                console.log(box1.counter);
+                box1.light.position.copy(this.curve.getPointAt(box1.counter));
+                box1.counter += (0.004 + Math.random() * 0.004);
+            } else {
+                box1.counter = 0;
+            }
+
+
+            var box2 = this.box2;
+            if (box2.counter < 1) {
+                box2.light.position.copy(this.curve.getPointAt(box2.counter));
+                box2.counter += (0.002 + Math.random() * 0.004);
+            } else {
+                box2.counter = 0;
+            }
+
+
+        };
+        //
+        var width = myObj.clientWidth;
+        var height = myObj.clientHeight;
+
+        var scene = new THREE.Scene();
+        var camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+        var renderer = new THREE.WebGLRenderer();
+        var light = new THREE.DirectionalLight(0xFFFFFF, 1);
+
+        var controls = new OrbitControls(camera, renderer.domElement);//控制鼠标移动镜头移动
+        controls.damping = 0.2;
+
+
+
+        var splines;
+        // var texture;
+
+        function setUpWorld() {
+            camera.position.set(0, -150, 120);
+            camera.lookAt(scene.position);
+            scene.add(camera);
+            renderer.setSize(width, height);
+            renderer.setClearColor(0x21111);
+            myObj.appendChild(renderer.domElement);
+            scene.add(light);
+            light.position.set(0, -300, 30);
+        }
+
+        /**
+         * splinesNum 线条的条数
+         */
+        function generateSplines(splinesNum, range, spacing) {
+            splines = [];
+            for (var i = 0; i < splinesNum; i += 1) {
+                var points = [];
+                //曲线
+                points = [
+                    new Point({x:-100,y:0,z:0}),
+                    new Point({x:-50,y:50,z:0}),
+                    new Point({x:100.199427036501952,y:0,z:0}),
+                ]
+                spline = new Spline(points);
+                spline.init(scene);
+                splines.push(spline);
+            }
+        }
+
+        function renderFrame() {
+            window.requestAnimationFrame(renderFrame);
+            //controls.update();
+
+            renderer.clear();
+            renderer.render(scene, camera);
+            splines.forEach(updateSpline);
+        }
+
+        function updateSpline(spline) {
+
+            spline.update();
+        }
+
+        function init() {
+            setUpWorld();
+            generateSplines(1, 2, 1);
+            renderFrame();
+
+        }
+
+        return {
+            init: init
+        };
+
+    })(THREE);
+
+    Boxes.init();
+
+</script>
+</body>
+
+</html>

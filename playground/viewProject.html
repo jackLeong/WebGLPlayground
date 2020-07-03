@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
+    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="../node_modules/three/build/three.js"></script>
+    <script src="./libs/threejs/THREE.MeshLine.js"></script>
+    <link rel="stylesheet" href="./libs/arcgis/main.css">
+<!--    <link rel="stylesheet" href="./arcgis-api/main.css">-->
+    <script src="./libs/arcgis/dojo.js"></script>
+<!--    <script src="./arcgis-api/dojo.js"></script>-->
+
+    <title></title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+<div id="viewDiv"></div>
+
+<script>
+    window.onload = function () {
+        require([
+            "./libs/gl-matrix-min.js",
+            "esri/Map",
+            "esri/views/SceneView",
+            "esri/views/3d/externalRenderers",
+            "esri/geometry/SpatialReference",
+            "esri/geometry/Point",
+            "esri/core/declare",
+            "esri/Graphic",
+            "esri/layers/TileLayer",
+            "esri/Basemap"
+        ], function(glMatrix,Map,SceneView,externalRenderers,SpatialReference,Point,declare,Graphic,TileLayer,Basemap) {
+            var samples = [[116.24, 39.55], [117.12, 39.02]];
+
+            // var map = new Map({
+            //     basemap: "osm"
+            // });
+
+            var baseVecLayer = new TileLayer({
+                url: 'https://augurit.gzcc.gov.cn/server/rest/services/basemap/Dianziditu0629/MapServer',
+            });
+
+            var basemap = new Basemap({
+                baseLayers: [baseVecLayer]
+            });
+
+            var map = new Map({
+                basemap: basemap,
+                ground: {
+                    type: 'ground',
+                    surfaceColor: '#fffffff'
+                }
+            });
+
+            const RandomColors = [
+                // '#1A93D3',
+                // '#B5C334',
+                // '#C1232B',
+                // '#E87C25',
+                // '#27727B',
+                // '#FE8463',
+                // '#9BCA63',
+                // '#FAD860',
+                // '#F3A43B',
+                // '#60C0DD',
+                // '#D7504B',
+                // '#C6E579',
+                // '#F4E001',
+                // '#F0805A',
+                // '#26C0C0',
+                // '#c23531',
+
+                '#00FFFF',
+                '#00FF00',
+
+                // '#2f4554',
+                // '#61a0a8',
+                // '#d48265',
+                // '#91c7ae',
+                // '#749f83',
+                // '#ca8622',
+                // '#bda29a',
+                // '#6e7074',
+                // '#546570',
+                // '#c4ccd3',
+            ];
+
+            var colorindex = 0;
+
+            function getColor() {
+                if (colorindex === 0) {
+                    colorindex = 1;
+                } else {
+                    colorindex = 0;
+                }
+                return RandomColors[colorindex].replace('#', '0x');
+            }
+            var view = new SceneView({
+                map: map,
+                container: document.getElementById("viewDiv"),
+                // camera: {
+                //     heading: 0.1653984525583375,
+                //     tilt: 0.4999486160013297,
+                //     position: {
+                //         x: 12939796.2731216,
+                //         y: 4800743.332382973,
+                //         z: 712.8388782627881,
+                //         spatialReference: {
+                //             wkid: 102100
+                //         }
+                //     }
+                // }
+            });
+
+            view.on("click",evt => {
+                let mp = evt.mapPoint;
+                console.log(mp.x, mp.y, mp.z);
+            })
+
+            var points = [
+                [33992.93628163717, 245755.31013663264, 0],
+                [39602.909048778674, 225782.9939856698, 0],
+                [52750.93046391338, 229850.1219896941, 0],
+                [60884.59688423796, 257605.06298537232, 0],
+
+                [43178.18397926882, 227855.23116826505, 50],
+                [43259.23646916745, 227871.5424925309, 50],
+                [43259.23646916745, 227871.5424925309, 0],
+                [43178.18397926882, 227855.23116826505, 0]
+            ];
+
+            function getSimpleMarkSymbol(color) {
+                return {
+                    type: "simple-marker",
+                    style: "circle",
+                    color: color || "red",
+                    size: "10px",
+                    outline: {
+                        color: [255, 0, 0],
+                        width: 1  // points
+                    }
+                };
+            }
+
+
+
+
+
+            // view.map.ground.opacity = 0.4;
+            window.view = view;
+
+            var customRenderer = declare(null, {
+                constructor: function(view) {
+                    this.view = view;
+                },
+
+                setup: function(context) {
+                    this.renderer = new THREE.WebGLRenderer({
+                        context: context.gl,
+                        premultipliedAlpha: false,
+                    });
+                    this.renderer.setPixelRatio(window.devicePixelRatio);
+                    this.renderer.setViewport(0, 0, this.view.width, this.view.height);
+
+                    // Make sure it does not clear anything before rendering
+                    this.renderer.autoClear = false;
+                    this.renderer.autoClearDepth = false;
+                    this.renderer.autoClearColor = false;
+                    this.renderer.autoClearStencil = false;
+
+                    // The ArcGIS JS API renders to custom offscreen buffers, and not to the default framebuffers.
+                    // We have to inject this bit of code into the three.js runtime in order for it to bind those
+                    // buffers instead of the default ones.
+                    var originalSetRenderTarget = this.renderer.setRenderTarget.bind(this.renderer);
+                    this.renderer.setRenderTarget = function (target) {
+                        originalSetRenderTarget(target);
+                        if (target == null) {
+                            context.bindRenderTarget();
+                        }
+                    };
+
+                    this.scene = new THREE.Scene();
+
+                    this.camera = new THREE.PerspectiveCamera();
+                    this._createLights();
+
+                    this._createVideoPanel();
+
+                    this.stop = false;
+                    // cleanup
+                    context.resetWebGLState();
+                },
+                render: function(context) {
+
+
+                     this.renderer.state.reset();  // this.renderer.resetGLState(); 已废弃
+
+                    // Update the THREE.js camera so it's synchronized to our camera
+                    this._updateCamera(context);
+                    //   console.log('1');
+                    this._updateObjects(context);
+                    this._updateLights(context);
+
+                    // Render the scene
+                    this.renderer.render(this.scene, this.camera);
+
+                    // Immediately request a new redraw
+                    externalRenderers.requestRender(this.view);
+
+                    context.resetWebGLState();
+                },
+                _createVideoPanel: function() {
+
+                    var inSR = view.spatialReference;
+                    this.vertexs = points.map(function(point) {
+                        return externalRenderers.toRenderCoordinates(
+                            view,               //view
+                            point,   //srcCoordinates
+                            0,                  //srcStart
+                            inSR,      //srcSpatialReference
+                            new Float32Array(3), //destCoordinates
+                            0,                  //destStart
+                            1
+                        )
+                    });
+                    console.log(this.vertexs);
+
+                    this.createShapeGeometry();
+                    this.createGeometryByVertices();
+                     this.createBoxGeometry();
+                },
+                _updateObjects(context) {
+                    // if (!this.stop) {
+                    //     this.cube.position.x = this.cube.position.x + 0.1;
+                    //     this.cube.position.y = this.cube.position.y + 0.1;
+                    // }
+                    //
+                    // if (this.cube.position.x > 0) {
+                    //     this.stop = true;
+                    // }
+                },
+                createBoxGeometry() {
+                    this.cube = this.createMesh(new THREE.BoxGeometry(220, 220, 220), "floor-wood.jpg");
+                    this.cube.position.set(
+                        this.vertexs[1][0],
+                        this.vertexs[1][1],
+                        this.vertexs[1][2]
+                        // points[4][0],
+                        // points[4][1],
+                        // points[4][2]
+                    );
+                    this.scene.add(this.cube);
+                },
+                createGeometryByVertices() {
+
+                    var resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
+                    var color1 = Number(getColor());
+                    for(var i=3; i<this.vertexs.length - 1; i++) {
+
+                        var geometry = new THREE.Geometry();
+                        geometry.vertices = [this.vertexs[i], this.vertexs[i+1], this.vertexs[i+2]];
+
+                        var g = new MeshLine();
+                        g.setGeometry(geometry);
+
+                        var line = new THREE.Mesh(
+                            g.geometry,
+                            new MeshLineMaterial({
+                                useMap: false,
+                                color: new THREE.Color(color1),
+                                opacity: 0,
+                                transparent: true,
+                                dashArray: 0,
+                                resolution: resolution,
+                                sizeAttenuation: false,
+                                lineWidth: 150,
+                                near: this.camera.near,
+                                far: this.camera.far,
+                            })
+                        );
+                        // line.visible = false;
+                        // line.flag = i;
+                        // line.offset = offset;
+
+                        // Add line
+                        this.scene.add(line);
+                    }
+                },
+                createSphereBufferGeometry() {
+                    this.markerGeometry = new THREE.SphereBufferGeometry(
+                        12 * 1000,
+                        16,
+                        16
+                    );
+                    this.markerMaterial = new THREE.MeshBasicMaterial({
+                        color: 0xe03110,
+                        transparent: true,
+                        opacity: 0.75
+                    });
+
+
+                    var markerObject = new THREE.Mesh(
+                        this.markerGeometry,
+                        this.markerMaterial
+                    );
+                    markerObject.position.set(
+                        this.vertexs[0][0],
+                        this.vertexs[0][1],
+                        this.vertexs[0][2]
+                    );
+                    this.scene.add(markerObject);
+                },
+
+                createShapeGeometry() {
+                    var x = this.vertexs[0][0], y = this.vertexs[0][1];
+
+                    var heartShape = new THREE.Shape();
+
+                    heartShape.moveTo( points[1][0], points[1][1] );
+                    heartShape.lineTo( points[2][0], points[2][1] );
+                    heartShape.lineTo( points[3][0], points[3][1]);
+                    // heartShape.lineTo( this.vertexs[3][0],  this.vertexs[3][1]);
+                    // heartShape.lineTo( x,  y);
+
+
+                    var geometry = new THREE.ShapeGeometry( heartShape );
+                    var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+                    var mesh = new THREE.Mesh( geometry, material ) ;
+                    // mesh.position.set(
+                    //     this.vertexs[0][0],
+                    //     this.vertexs[0][1],
+                    //     this.vertexs[0][2]
+                    // );
+                    this.scene.add( mesh );
+                },
+
+                createMesh(geom) {
+
+                    var materialArray = [];
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0031ba}));
+                    // materialArray.push(new THREE.MeshBasicMaterial({map: texture}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 0xff51ba}));
+                    var faceMaterial = new THREE.MeshFaceMaterial(materialArray);
+
+
+                    // create a multimaterial
+                    var mesh = new THREE.Mesh(geom, faceMaterial);
+
+                    return mesh;
+                },
+                _createLights: function () {
+                    // setup scene lighting
+                    this.ambient = new THREE.AmbientLight(0xffffff, 0.5);
+                    this.scene.add(this.ambient);
+                    this.sun = new THREE.DirectionalLight(0xffffff, 0.5);
+                    this.scene.add(this.sun);
+                },
+                _updateLights: function (context) {
+                    var l = context.sunLight;
+                    this.sun.position.set(l.direction[0], l.direction[1], l.direction[2]);
+                    this.sun.intensity = l.diffuse.intensity;
+                    this.sun.color = new THREE.Color(l.diffuse.color[0], l.diffuse.color[1], l.diffuse.color[2]);
+
+                    this.ambient.intensity = l.ambient.intensity;
+                    this.ambient.color = new THREE.Color(
+                        l.ambient.color[0],
+                        l.ambient.color[1],
+                        l.ambient.color[2]
+                    );
+                },
+                _updateCamera: function (context) {
+                    // update camera parameters
+                    ///////////////////////////////////////////////////////////////////////////////////
+                    var cam = context.camera;
+
+                    this.camera.position.set(cam.eye[0], cam.eye[1], cam.eye[2]);
+                    this.camera.up.set(cam.up[0], cam.up[1], cam.up[2]);
+                    this.camera.lookAt(new THREE.Vector3(cam.center[0], cam.center[1], cam.center[2]));
+
+                    // Projection matrix can be copied directly
+                    this.camera.projectionMatrix.fromArray(cam.projectionMatrix);
+                }
+            });
+
+            view.when(function() {
+                points.forEach(function (p) {
+                    var g= new Graphic({
+                        geometry: {
+                            x: p[0],
+                            y:p[1],
+                            z:0,
+                            type: 'point',
+                            spatialReference: view.spatialReference
+                        },
+                        symbol: getSimpleMarkSymbol()
+                    })
+
+                    view.graphics.add(g);
+
+                })
+                // var g2= new Graphic({
+                //     geometry: {
+                //         x: 0,
+                //         y:0,
+                //         z:0,
+                //         type: 'point',
+                //         spatialReference: view.spatialReference
+                //     },
+                //     symbol: getSimpleMarkSymbol('green')
+                // })
+                // view.graphics.add(g2);
+
+                var myRenderer = new customRenderer();
+                myRenderer.view = view;
+                externalRenderers.add(view, myRenderer);
+            });
+        });
+    }
+</script>
+</body>
+</html>

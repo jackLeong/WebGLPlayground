@@ -1,0 +1,333 @@
+* {
+	margin: 0px; padding: 0px; -webkit-text-size-adjust: none;
+}
+html {
+	
+}
+html {
+	height: 100%; overflow: hidden; min-height: 100%;
+}
+body {
+	height: 100%; overflow: hidden; min-height: 100%;
+}
+body {
+	font: 12px/100% Apple SD Gothic Neo, "Apple SD ???? Neo", "Roboto", "?? ??", "Malgun Gothic", "Apple Gothic", NanumGothic, "????", Dotum, "??", gulim, "??", verdana, sans-serif; border: 0px currentColor; border-image: none; color: rgb(51, 51, 51); font-size-adjust: none; font-stretch: normal;
+}
+select {
+	font: 12px/100% Apple SD Gothic Neo, "Apple SD ???? Neo", "Roboto", "?? ??", "Malgun Gothic", "Apple Gothic", NanumGothic, "????", Dotum, "??", gulim, "??", verdana, sans-serif; border: 0px currentColor; border-image: none; color: rgb(51, 51, 51); font-size-adjust: none; font-stretch: normal;
+}
+textarea {
+	font: 12px/100% Apple SD Gothic Neo, "Apple SD ???? Neo", "Roboto", "?? ??", "Malgun Gothic", "Apple Gothic", NanumGothic, "????", Dotum, "??", gulim, "??", verdana, sans-serif; border: 0px currentColor; border-image: none; color: rgb(51, 51, 51); font-size-adjust: none; font-stretch: normal;
+}
+input {
+	font: 12px/100% Apple SD Gothic Neo, "Apple SD ???? Neo", "Roboto", "?? ??", "Malgun Gothic", "Apple Gothic", NanumGothic, "????", Dotum, "??", gulim, "??", verdana, sans-serif; border: 0px currentColor; border-image: none; color: rgb(51, 51, 51); font-size-adjust: none; font-stretch: normal;
+}
+body {
+	margin: 0px; padding: 0px;
+}
+div {
+	margin: 0px; padding: 0px;
+}
+dl {
+	margin: 0px; padding: 0px;
+}
+dt {
+	margin: 0px; padding: 0px;
+}
+dd {
+	margin: 0px; padding: 0px;
+}
+ul {
+	margin: 0px; padding: 0px;
+}
+ol {
+	margin: 0px; padding: 0px;
+}
+li {
+	margin: 0px; padding: 0px;
+}
+h1 {
+	margin: 0px; padding: 0px;
+}
+h2 {
+	margin: 0px; padding: 0px;
+}
+h3 {
+	margin: 0px; padding: 0px;
+}
+h4 {
+	margin: 0px; padding: 0px;
+}
+h5 {
+	margin: 0px; padding: 0px;
+}
+h6 {
+	margin: 0px; padding: 0px;
+}
+pre {
+	margin: 0px; padding: 0px;
+}
+form {
+	margin: 0px; padding: 0px;
+}
+fieldset {
+	margin: 0px; padding: 0px;
+}
+input {
+	margin: 0px; padding: 0px;
+}
+p {
+	margin: 0px; padding: 0px;
+}
+blockquote {
+	margin: 0px; padding: 0px;
+}
+table {
+	margin: 0px; padding: 0px;
+}
+th {
+	margin: 0px; padding: 0px;
+}
+td {
+	margin: 0px; padding: 0px;
+}
+embed {
+	margin: 0px; padding: 0px;
+}
+object {
+	margin: 0px; padding: 0px;
+}
+textarea {
+	margin: 0px; padding: 0px;
+}
+a {
+	margin: 0px; padding: 0px;
+}
+img {
+	margin: 0px; padding: 0px;
+}
+table {
+	border-collapse: collapse; border-spacing: 0;
+}
+table img {
+	vertical-align: middle;
+}
+select {
+	vertical-align: middle;
+}
+input {
+	vertical-align: middle;
+}
+table tr td {
+	vertical-align: middle;
+}
+table tr th {
+	vertical-align: middle;
+}
+form {
+	border: 0px currentColor; border-image: none;
+}
+fieldset {
+	border: 0px currentColor; border-image: none;
+}
+abbr {
+	border: 0px currentColor; border-image: none;
+}
+acronym {
+	border: 0px currentColor; border-image: none;
+}
+img {
+	border: 0px currentColor; border-image: none; vertical-align: top;
+}
+address {
+	font-style: normal; font-weight: normal;
+}
+caption {
+	font-style: normal; font-weight: normal;
+}
+cite {
+	font-style: normal; font-weight: normal;
+}
+code {
+	font-style: normal; font-weight: normal;
+}
+dfn {
+	font-style: normal; font-weight: normal;
+}
+em {
+	font-style: normal; font-weight: normal;
+}
+h1 {
+	font-style: normal; font-weight: normal;
+}
+h2 {
+	font-style: normal; font-weight: normal;
+}
+h3 {
+	font-style: normal; font-weight: normal;
+}
+h4 {
+	font-style: normal; font-weight: normal;
+}
+h5 {
+	font-style: normal; font-weight: normal;
+}
+h6 {
+	font-style: normal; font-weight: normal;
+}
+th {
+	font-style: normal; font-weight: normal;
+}
+var {
+	font-style: normal; font-weight: normal;
+}
+ol {
+	list-style: none;
+}
+ul {
+	list-style: none;
+}
+li {
+	list-style: none;
+}
+table td a {
+	display: inline-block;
+}
+table caption {
+	display: none;
+}
+a {
+	text-decoration: none;
+}
+input[type='image'] {
+	vertical-align: top;
+}
+body {
+	overflow: hidden;
+}
+.modal-table {
+	width: 100%; height: 100%; display: table; table-layout: fixed;
+}
+.modal-cell {
+	width: 100%; height: 100%; text-align: center; vertical-align: middle; display: table-cell;
+}
+#accessibility {
+	width: 0px; height: 0px; line-height: 0; text-indent: -5000px; overflow: hidden; font-size: 0px; visibility: hidden; position: absolute;
+}
+hr {
+	width: 0px; height: 0px; line-height: 0; text-indent: -5000px; overflow: hidden; font-size: 0px; visibility: hidden; position: absolute;
+}
+caption {
+	width: 0px; height: 0px; line-height: 0; text-indent: -5000px; overflow: hidden; font-size: 0px; visibility: hidden; position: absolute;
+}
+legend {
+	width: 0px; height: 0px; line-height: 0; text-indent: -5000px; overflow: hidden; font-size: 0px; visibility: hidden; position: absolute;
+}
+.skip {
+	width: 0px; height: 0px; line-height: 0; text-indent: -5000px; overflow: hidden; font-size: 0px; visibility: hidden; position: absolute;
+}
+body {
+	background-color: rgb(42, 42, 42);
+}
+.container_bg {
+	left: 0px; top: 0px; right: 0px; bottom: 0px; position: absolute; pointer-events: none;
+}
+.container_bg #solid {
+	left: 0px; top: 0px; right: 0px; bottom: 0px; position: absolute;
+}
+.container_bg #gradient {
+	background: linear-gradient(90deg, rgb(76, 59, 59) 0%, rgb(39, 38, 38) 100%); left: 0px; top: 0px; right: 0px; bottom: 0px; position: absolute; opacity: 0;
+}
+#container_3d {
+	left: 0px; top: 0px; right: 0px; bottom: 0px; overflow: hidden; position: absolute;
+}
+.cursorPointer {
+	cursor: pointer;
+}
+#header {
+	left: 0px; top: 0px; width: 100%; display: none; position: fixed; z-index: 10;
+}
+#header h1 {
+	left: 5px; top: 5px; position: absolute;
+}
+#header h1 a {
+	padding: 10px; width: 132px; color: rgb(255, 255, 255); line-height: 100%; font-size: 1rem; font-weight: bold; display: block; box-sizing: border-box; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;
+}
+#header h1 a svg {
+	width: 100%;
+}
+#header .sound {
+	top: 18px; right: 10px; color: rgb(255, 255, 255); position: absolute; opacity: 0;
+}
+#header .sound a {
+	line-height: 100%; font-size: 0.8rem; display: block; cursor: pointer;
+}
+#indicators {
+	left: 0px; top: 0px; position: fixed; pointer-events: none;
+}
+.indicator {
+	left: 0px; top: 0px; width: 100px; height: 100px; position: absolute; box-sizing: border-box; pointer-events: none; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;
+}
+.indicator svg {
+	left: 0px; top: 0px; position: absolute;
+}
+.indicator .group {
+	transform-origin: 0% 50%; moz-transform-origin: 0; -o-transform-origin: 0; -webkit-transform-origin: 0;
+}
+.indicator .center {
+	border-radius: 8px; left: -5px; top: -5px; width: 10px; height: 10px; display: block; position: absolute; box-sizing: border-box; opacity: 0; animation-name: fadeInOut; animation-duration: 1s; animation-delay: 0s; animation-direction: alternate; animation-iteration-count: infinite; animation-fill-mode: both; background-color: rgb(255, 255, 255); -webkit-box-sizing: border-box; -moz-box-sizing: border-box; -webkit-border-radius: 8px; -moz-border-radius: 8px; -ms-border-radius: 8px; -webkit-animation-delay: 0s; -webkit-animation-duration: 1s; -webkit-animation-name: fadeInOut; -webkit-animation-iteration-count: infinite; -webkit-animation-fill-mode: both; -webkit-animation-direction: alternate; -moz-animation-delay: 0s; -moz-animation-duration: 1s; -moz-animation-name: fadeInOut; -moz-animation-iteration-count: infinite; -moz-animation-fill-mode: both; -moz-animation-direction: alternate; -o-animation-delay: 0s; -o-animation-duration: 1s; -o-animation-name: fadeInOut; -o-animation-iteration-count: infinite; -o-animation-fill-mode: both; -o-animation-direction: alternate;
+}
+.indicator .circle {
+	border-radius: 50px; border: 2px solid rgb(255, 255, 255); border-image: none; left: -50px; top: -50px; width: 100px; height: 100px; text-align: center; line-height: 100px; display: block; position: absolute; box-sizing: border-box; pointer-events: none; -webkit-box-sizing: border-box; -moz-box-sizing: border-box; -webkit-border-radius: 50px; -moz-border-radius: 50px; -ms-border-radius: 50px;
+}
+.indicator .circle-0 {
+	animation-name: scaleOut; animation-duration: 3s; animation-delay: 0s; animation-direction: normal; animation-iteration-count: infinite; animation-fill-mode: both; -webkit-animation-delay: 0s; -webkit-animation-duration: 3s; -webkit-animation-name: scaleOut; -webkit-animation-iteration-count: infinite; -webkit-animation-fill-mode: both; -webkit-animation-direction: normal; -moz-animation-delay: 0s; -moz-animation-duration: 3s; -moz-animation-name: scaleOut; -moz-animation-iteration-count: infinite; -moz-animation-fill-mode: both; -moz-animation-direction: normal; -o-animation-delay: 0s; -o-animation-duration: 3s; -o-animation-name: scaleOut; -o-animation-iteration-count: infinite; -o-animation-fill-mode: both; -o-animation-direction: normal;
+}
+.indicator .circle-1 {
+	animation-name: scaleOut; animation-duration: 3s; animation-delay: 1s; animation-direction: normal; animation-iteration-count: infinite; animation-fill-mode: both; -webkit-animation-delay: 1s; -webkit-animation-duration: 3s; -webkit-animation-name: scaleOut; -webkit-animation-iteration-count: infinite; -webkit-animation-fill-mode: both; -webkit-animation-direction: normal; -moz-animation-delay: 1s; -moz-animation-duration: 3s; -moz-animation-name: scaleOut; -moz-animation-iteration-count: infinite; -moz-animation-fill-mode: both; -moz-animation-direction: normal; -o-animation-delay: 1s; -o-animation-duration: 3s; -o-animation-name: scaleOut; -o-animation-iteration-count: infinite; -o-animation-fill-mode: both; -o-animation-direction: normal;
+}
+.indicator .circle-2 {
+	animation-name: scaleOut; animation-duration: 3s; animation-delay: 2s; animation-direction: normal; animation-iteration-count: infinite; animation-fill-mode: both; -webkit-animation-delay: 2s; -webkit-animation-duration: 3s; -webkit-animation-name: scaleOut; -webkit-animation-iteration-count: infinite; -webkit-animation-fill-mode: both; -webkit-animation-direction: normal; -moz-animation-delay: 2s; -moz-animation-duration: 3s; -moz-animation-name: scaleOut; -moz-animation-iteration-count: infinite; -moz-animation-fill-mode: both; -moz-animation-direction: normal; -o-animation-delay: 2s; -o-animation-duration: 3s; -o-animation-name: scaleOut; -o-animation-iteration-count: infinite; -o-animation-fill-mode: both; -o-animation-direction: normal;
+}
+.indicator .text {
+	left: -25px; top: -27px; width: 50px; text-align: center; color: rgb(255, 255, 255); font-size: 0.9rem; font-weight: bold; display: inline-block; position: absolute; opacity: 0.65;
+}
+.indicator.black .center {
+	background-color: rgb(88, 86, 86);
+}
+.indicator.black .circle {
+	border: 2px solid rgb(88, 86, 86); border-image: none;
+}
+#introduce {
+	left: 0px; top: 0px; right: 0px; bottom: 0px; display: none; position: absolute; z-index: 1; opacity: 0;
+}
+#introduce .card {
+	padding: 20px 10px; text-align: center;
+}
+#introduce .card h3 {
+	color: rgb(68, 68, 68); line-height: 150%; font-size: 1rem;
+}
+#introduce .card a {
+	transition:border 1s; color: rgb(51, 51, 51); font-size: 1.5rem; font-weight: bold; margin-left: 30px; border-bottom-color: rgb(51, 51, 51); border-bottom-width: 3px; border-bottom-style: solid; -moz-transition: border 1s; -o-transition: border 1s; -webkit-transition: border 1s;
+}
+#introduce .card a:hover {
+	border-bottom-color: rgb(255, 255, 255); border-bottom-width: 3px; border-bottom-style: solid;
+}
+#book {
+	padding: 0px 20px 50px; left: 0px; width: 100%; bottom: 0px; position: absolute; box-sizing: border-box; pointer-events: none; -webkit-box-sizing: border-box; -moz-box-sizing: border-box;
+}
+#book div {
+	text-align: center; color: rgb(255, 255, 255);
+}
+#book div p {
+	line-height: 170%; font-family: "Nanum Myeongjo", serif; font-size: 1.1rem; opacity: 0;
+}
+@media screen and (max-width:480px)
+{
+#book div p {
+	line-height: 170%; font-size: 0.95rem;
+}
+}
+#created {
+	right: 10px; bottom: 10px; color: rgb(239, 239, 239); position: absolute; opacity: 0.5;
+}
