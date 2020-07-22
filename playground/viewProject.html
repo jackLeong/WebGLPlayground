@@ -4,12 +4,13 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0"/>
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+    <script src="./libs/hls.min.js"></script>
     <script src="../node_modules/three/build/three.js"></script>
     <script src="./libs/threejs/THREE.MeshLine.js"></script>
     <link rel="stylesheet" href="./libs/arcgis/main.css">
 <!--    <link rel="stylesheet" href="./arcgis-api/main.css">-->
     <script src="./libs/arcgis/dojo.js"></script>
-<!--    <script src="./arcgis-api/dojo.js"></script>-->
+
 
     <title></title>
     <style>
@@ -25,12 +26,26 @@
 </head>
 <body>
 <div id="viewDiv"></div>
+<!--<video id="video" style="display: block; width: 180px;height:120px;position: absolute; left: 15px; top: 275px;" src="http://203.195.187.186:10001/flv/hls/34020000001320000002_0200000035.flv" controls="true" autoplay="true"></video>-->
+
+<video id="video3" style="display: block; width: 180px;height:120px;position: absolute; left: 15px; top: 475px;" src="./resources/VID_20191109_085457.mp4" controls="true" autoplay="true"></video>
+
+<video id="video" style="display: none; width: 180px;height:120px;position: absolute; left: 15px; top: 275px;" controls autoplay muted >
+</video>
 
 <script>
+
+    var dojoConfig = {
+        paths: {
+            // agMap: basePath + "/CIM/sdk/ui/gis/js",
+        },
+
+    };
     window.onload = function () {
         require([
             "./libs/gl-matrix-min.js",
             "esri/Map",
+            // "./libs/arcgis/SceneView.js",
             "esri/views/SceneView",
             "esri/views/3d/externalRenderers",
             "esri/geometry/SpatialReference",
@@ -38,8 +53,15 @@
             "esri/core/declare",
             "esri/Graphic",
             "esri/layers/TileLayer",
-            "esri/Basemap"
-        ], function(glMatrix,Map,SceneView,externalRenderers,SpatialReference,Point,declare,Graphic,TileLayer,Basemap) {
+            "esri/layers/GraphicsLayer",
+            "esri/layers/SceneLayer",
+            "esri/Basemap",
+            "esri/geometry/Mesh",
+            "esri/geometry/support/MeshMaterial",
+            "esri/geometry/support/MeshTexture",
+            "esri/geometry/support/MeshComponent",
+            "esri/geometry/support/MeshMaterialMetallicRoughness"
+        ], function(glMatrix,Map,SceneView,externalRenderers,SpatialReference,Point,declare,Graphic,TileLayer,GraphicsLayer,SceneLayer,Basemap,Mesh,MeshMaterial,MeshTexture,MeshComponent,MeshMaterialMetallicRoughness) {
             var samples = [[116.24, 39.55], [117.12, 39.02]];
 
             // var map = new Map({
@@ -61,6 +83,8 @@
                     surfaceColor: '#fffffff'
                 }
             });
+            window.SceneView = SceneView;
+            window.SceneLayer = SceneLayer;
 
             const RandomColors = [
                 // '#1A93D3',
@@ -108,24 +132,34 @@
             var view = new SceneView({
                 map: map,
                 container: document.getElementById("viewDiv"),
-                // camera: {
-                //     heading: 0.1653984525583375,
-                //     tilt: 0.4999486160013297,
-                //     position: {
-                //         x: 12939796.2731216,
-                //         y: 4800743.332382973,
-                //         z: 712.8388782627881,
-                //         spatialReference: {
-                //             wkid: 102100
-                //         }
-                //     }
+                alphaCompositingEnabled: true,
+                viewingMode: "local",
+                // clippingArea: extent,
+                // spatialReference: SpatialReference.WebMercator,
+                qualityProfile: "high",
+                // environment: {
+                //     background: {
+                //         type: "color",
+                //         color: [255, 255, 255, 1]
+                //     },
+                //     starsEnabled: false,
+                //     atmosphereEnabled: false,
+                    // lighting: {
+                    //     directShadowsEnabled: true,
+                    //     date:
+                    //         "Mon Mar 16 2020 23:55:53 GMT+0100 (Central European Standard Time)"
+                    // }
                 // }
             });
 
-            view.on("click",evt => {
-                let mp = evt.mapPoint;
-                console.log(mp.x, mp.y, mp.z);
-            })
+
+            // view.on("click",evt => {
+            //     let mp = evt.mapPoint;
+            //     console.log(mp.x, mp.y, mp.z);
+            // })
+
+            graphicsLayer = new GraphicsLayer({id: "uuu"});
+            view.map.add(graphicsLayer);
 
             var points = [
                 [33992.93628163717, 245755.31013663264, 0],
@@ -133,10 +167,15 @@
                 [52750.93046391338, 229850.1219896941, 0],
                 [60884.59688423796, 257605.06298537232, 0],
 
-                [43178.18397926882, 227855.23116826505, 50],
                 [43259.23646916745, 227871.5424925309, 50],
+                [43178.18397926882, 227855.23116826505, 50],
                 [43259.23646916745, 227871.5424925309, 0],
-                [43178.18397926882, 227855.23116826505, 0]
+                [43178.18397926882, 227855.23116826505, 0],
+
+                [43259.23646916745, 227873.5424925309, 0],
+                [43259.23646916745, 227873.5424925309, 50],
+                [43178.18397926882, 227857.23116826505, 50],
+                [43178.18397926882, 227857.23116826505, 0]
             ];
 
             function getSimpleMarkSymbol(color) {
@@ -153,13 +192,311 @@
             }
 
 
-
-
-
             // view.map.ground.opacity = 0.4;
             window.view = view;
 
-            var customRenderer = declare(null, {
+            view.when(function() {
+
+               // var mrr =  new MeshMaterialMetallicRoughness({
+               //      // color: 'white',
+               //      // metallic: 1,
+               //      // roughness: 0,
+               //      metallicRoughness: {
+               //         baseColorFactor: [2, 2, 2, 2]
+               //     },
+               //    metallicRoughnessTexture: {
+               //         color: "#ff00ff",
+               //        metallicRoughness: {
+               //            baseColorFactor: [2, 2, 2, 2]
+               //        },
+               //    }
+               //  });
+               // var sceneLayer = new SceneLayer({
+               //      url: 'https://augurit.gzcc.gov.cn/server/rest/services/Hosted/TianheBuildings_A/SceneServer',
+               //      renderer: {
+               //          type: "simple",  // autocasts as new SimpleRenderer()
+               //          symbol: {
+               //              type: "mesh-3d",  // autocasts as new MeshSymbol3D()
+               //              symbolLayers: [{
+               //                  type: "fill",  // autocasts as new FillSymbol3DLayer()
+               //                  material: mrr
+               //              }]
+               //          }
+               //      }
+               //  });
+               // view.map.add(sceneLayer);
+               // view.whenLayerView(sceneLayer).then(function (ly) {
+               //      console.log(ly);
+               //  })
+               //  console.log(mrr);
+
+                points.forEach(function (p) {
+                    var g= new Graphic({
+                        geometry: {
+                            x: p[0],
+                            y:p[1],
+                            z: p[2],
+                            type: 'point',
+                            spatialReference: view.spatialReference
+                        },
+                        symbol: getSimpleMarkSymbol()
+                    })
+
+                    view.graphics.add(g);
+
+                })
+
+                var _getSymbol = function () {
+                    return {
+                        type: "mesh-3d",
+                        symbolLayers: [{ type: "fill" }]
+                    };
+                };
+
+                var myRenderer = new customRenderer();
+                myRenderer.view = view;
+                externalRenderers.add(view, myRenderer);
+                //TODO OK
+                //  createArcGISPolygon3D();
+                // createMesByPolygon();
+
+                function createArcGISPolygon3D() {
+
+
+                    const video = document.createElement("video");
+                    // video.src = 'http://203.195.187.186:10001/flv/hls/34020000001320000002_0200000035.flv';
+                    video.crossOrigin = "anonymous";
+                    video.autoplay = true;
+                    video.muted = true;
+                    document.body.appendChild(video);
+                    video.style.position = "absolute";
+                    video.style.top = 0;
+                    // video.style.backgroundColor = 'blue';
+                    video.style.height = '300px';
+                    video.style.zIndex = 100000;
+                    video.style.width = '500px';
+                    // video.style.visibility = "hidden";
+
+                    if(Hls.isSupported()) {
+                        var hls = new Hls({
+                            startLevel: 1
+                        });
+                        // hls.loadSource('http://129.204.12.208:8080/hls/box_5e7c636b731a6725cc81949f-Ao9gFsFx88.m3u8');
+                          hls.loadSource('http://203.88.202.230:10001/hls/34020000001320000012_0200000030/34020000001320000012_0200000030_live.m3u8'); //海心沙9楼
+                      //  hls.loadSource('http://203.195.187.186:10001/hls/34020000001320000012_0200000030/34020000001320000012_0200000030_live.m3u8'); //海心沙1楼
+                        //  hls.loadSource('http://203.195.187.186:10001/flv/hls/34020000001320000002_0200000035.flv');
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                            video.play();
+                          console.log(hls.levels);
+                        });
+                    }
+
+                    var _getPolygonGeom = function () {
+                        var a=  [
+                            [43259.23646916745, 227871.5424925309, 50],
+                            [43178.18397926882, 227855.23116826505, 50],
+                            [43178.18397926882, 227855.23116826505, 0],
+                            [43259.23646916745, 227871.5424925309, 0],
+
+                            [43259.23646916745, 227872.5424925309, 50],
+                            [43178.18397926882, 227856.23116826505, 50],
+                            [43178.18397926882, 227856.23116826505, 0],
+                            [43259.23646916745, 227872.5424925309, 0],
+                        ];
+                        var b = [];
+                        for (var i=0; i<a.length; i++) {
+                            b = b.concat(a[i]);
+                        }
+
+                        return new Mesh({
+                            vertexAttributes: {
+                                position: b,
+                                // uv: [0,0,1,0,1,1,0,1] //// 逆时针 贴图会呈镜像显示
+                                uv: [
+                                        1,0, 0,0, 0,1, 1,1,
+                                         1,0, 0,0, 0,1, 1,1
+                                    ], //顺时针 贴图会呈正常
+                                color: [
+                                    255,255,255,255,
+                                    255,255,255,255,
+                                    255,255,255,255,
+                                    255,255,255,255
+                                ]
+                            },
+                            components: [
+                                {
+                                    faces: [1,0,3, 3,2,1],// 逆时针
+                                    //    faces: [0,1,2, 2,3,0],// 顺时针
+                                    // material: { // 0k- 图片贴图
+                                    //     colorTexture:  new MeshTexture({
+                                    //         url: "./resources/bathroom.jpg"
+                                    //     })
+                                    // },
+                                    material: {
+                                        colorTexture:  new MeshTexture({
+                                            data: video
+                                        })
+                                    },
+                                },
+                                {
+                                 faces: [5,7,6,6,4,5],// 逆时针
+                                 material: { color:'gray'}
+                                },
+                                {
+                                    faces: [5,1,2,2,7,5],// 逆时针
+                                    material: { color:'gray'}
+                                },
+                                {
+                                    faces: [4,0,1,1,5,4],// 逆时针
+                                    material: { color:'gray'}
+                                },
+                                {
+                                    faces: [0,4,6,6,3,0],// 逆时针
+                                    material: { color:'gray'}
+                                },
+                                {
+                                    faces: [7,6,3,3,2,7],// 逆时针
+                                    material: { color:'gray'}
+                                }
+                            ],
+                            spatialReference: view.spatialReference
+                        });
+                    };
+
+                    this.polygon = new Graphic({
+                        geometry: _getPolygonGeom(),
+                         symbol: _getSymbol(),
+                    });
+                    graphicsLayer.add(this.polygon);
+                    view.goTo(this.polygon);
+
+                    // var video2 = document.getElementById("video2");
+                }
+
+                function createMesByPolygon() {
+
+                    const video2 = document.createElement("video");
+                    video2.src = "./resources/VID_20191109_085457.mp4";
+                    video2.crossOrigin = "anonymous";
+                    video2.autoplay = true;
+                    video2.muted = true;
+
+                    document.body.appendChild(video2);
+                    video2.style.position = "absolute";
+                    video2.style.top = 0;
+                    video2.style.height = 0;
+                    video2.style.visibility = "hidden";
+
+
+                    const mesh = Mesh.createBox(new Point({//43259.23646916745, 227871.5424925309
+                            x: 43759.23646916745, y:227871.5424925309, spatialReference: view.spatialReference
+                        }),
+                        {
+                            size: {
+                                width: 200,
+                                height: 200,
+                                depth: 200
+                            },
+                            material: {
+                                colorTexture: {
+                                    data: video2
+                                }
+                            }
+                        });
+
+
+                    var  gc = new Graphic({
+                        geometry: mesh,
+                        symbol: _getSymbol(),
+                    });
+
+                    graphicsLayer.add(gc);
+
+                }
+
+            });
+
+            function rotateGeom (e) {
+
+                let out2 = glMatrix.mat4.create();
+                let outq = glMatrix.quat.create();
+                glMatrix.quat.identity(outq);
+                let q = glMatrix.quat.rotateZ(outq, outq, rad);
+                let t = glMatrix.vec3.fromValues(0, 0, 0);    //平移
+                let o = glMatrix.vec3.fromValues(c.x, c.y, c.z); //旋转原点
+                let s = glMatrix.vec3.fromValues(1, 1, 1);
+                glMatrix.mat4.fromRotationTranslationScaleOrigin(out2, q, t, s, o);
+                // glMatrix.mat4.fromZRotation(out2, rad);
+                glMatrix.vec3.forEach(
+                    _position2,
+                    0,
+                    0,
+                    12,
+                    glMatrix.vec3.transformMat4,
+                    out2
+                );
+
+            };
+
+            function _showVideoProjectMesh(data) {
+                let position = data.mesh.vertexAttributes.position;
+                let videoUrl = data.mesh.videoUrl;
+                let camera = data.mesh.camera;
+
+                this.polygon = new Graphic({
+                    geometry: this._createVideoMesh(position, videoUrl),
+                    symbol: {
+                        type: "mesh-3d",
+                        symbolLayers: [{type: "fill"}]
+                    },
+                    attributes: {
+                        url: videoUrl
+                    }
+                });
+                this.graphicsLayer.add(this.polygon);
+                this._goToCamera(camera);
+
+            };
+            function addExtentBox() {
+                let dataExtent = this._view.dataExtent;
+                const mesh = Mesh.createBox(dataExtent.center,
+                    {
+                        size: {
+                            width: dataExtent.xmax - dataExtent.xmin,
+                            height: 10000,
+                            depth: dataExtent.ymax - dataExtent.ymin,
+                        },
+                        // material: {
+                        //     color: "red"
+                        // }
+                    });
+
+                var gc = new Graphic({
+                    geometry: mesh,
+                    symbol: {
+                        type: "mesh-3d",
+                        symbolLayers: [{
+                            type: "fill",
+                            color: 'transparent'
+                        }]
+                    },
+                });
+
+                this.graphicsLayer.add(gc);
+
+                this._view.on('click', (e) => {
+                    console.log(e.mapPoint, e.x, e.y);
+                    let a = this._view.toMap({x: e.x, y: e.y}, {
+                        include: gc
+                    });
+                    console.log('mapPoint', a);
+                });
+
+
+            };
+
+            var  customRenderer = declare(null, {
                 constructor: function(view) {
                     this.view = view;
                 },
@@ -168,6 +505,7 @@
                     this.renderer = new THREE.WebGLRenderer({
                         context: context.gl,
                         premultipliedAlpha: false,
+                        alpha:true
                     });
                     this.renderer.setPixelRatio(window.devicePixelRatio);
                     this.renderer.setViewport(0, 0, this.view.width, this.view.height);
@@ -181,6 +519,7 @@
                     // The ArcGIS JS API renders to custom offscreen buffers, and not to the default framebuffers.
                     // We have to inject this bit of code into the three.js runtime in order for it to bind those
                     // buffers instead of the default ones.
+                    //TODO renderer 是three.js 的 渲染器，context是 来自 arcgis的
                     var originalSetRenderTarget = this.renderer.setRenderTarget.bind(this.renderer);
                     this.renderer.setRenderTarget = function (target) {
                         originalSetRenderTarget(target);
@@ -194,7 +533,7 @@
                     this.camera = new THREE.PerspectiveCamera();
                     this._createLights();
 
-                    this._createVideoPanel();
+                    this._createGraphics();
 
                     this.stop = false;
                     // cleanup
@@ -203,7 +542,7 @@
                 render: function(context) {
 
 
-                     this.renderer.state.reset();  // this.renderer.resetGLState(); 已废弃
+                    this.renderer.state.reset();  // this.renderer.resetGLState(); 已废弃
 
                     // Update the THREE.js camera so it's synchronized to our camera
                     this._updateCamera(context);
@@ -214,16 +553,20 @@
                     // Render the scene
                     this.renderer.render(this.scene, this.camera);
 
+                    window.renderer = this.renderer;
+
                     // Immediately request a new redraw
                     externalRenderers.requestRender(this.view);
 
                     context.resetWebGLState();
                 },
-                _createVideoPanel: function() {
+                _createGraphics: function() {
 
                     var inSR = view.spatialReference;
-                    this.vertexs = points.map(function(point) {
-                        return externalRenderers.toRenderCoordinates(
+                    this.vertexs = [];
+                      for(let i=0; i<points.length; i++) {
+                        let point = points[i];
+                        let c = externalRenderers.toRenderCoordinates(
                             view,               //view
                             point,   //srcCoordinates
                             0,                  //srcStart
@@ -232,35 +575,155 @@
                             0,                  //destStart
                             1
                         )
-                    });
-                    console.log(this.vertexs);
+                          this.vertexs.push(c);
+                    }
+                    // console.log(this.vertexs);
 
-                    this.createShapeGeometry();
-                    this.createGeometryByVertices();
-                     this.createBoxGeometry();
+                   //   this.createShapeGeometry(); //二维的几何图形
+                  //  this.createGeometryByVertices();
+
+                     this.createThreeCustomPolygon3D();
+                     this.createBoxGeometry(); //TODO OK
+
                 },
-                _updateObjects(context) {
-                    // if (!this.stop) {
-                    //     this.cube.position.x = this.cube.position.x + 0.1;
-                    //     this.cube.position.y = this.cube.position.y + 0.1;
-                    // }
-                    //
-                    // if (this.cube.position.x > 0) {
-                    //     this.stop = true;
-                    // }
-                },
+
                 createBoxGeometry() {
-                    this.cube = this.createMesh(new THREE.BoxGeometry(220, 220, 220), "floor-wood.jpg");
+                    this.cube = this.createMesh(new THREE.BoxGeometry(620, 420, 320), "floor-wood.jpg"); //长宽高
                     this.cube.position.set(
-                        this.vertexs[1][0],
-                        this.vertexs[1][1],
-                        this.vertexs[1][2]
+                        this.vertexs[4][0] - 400,
+                        this.vertexs[4][1],
+                        this.vertexs[4][2]+160
+                    );
+                    this.scene.add(this.cube);
+                },
+
+                createThreeCustomPolygon3D: function() { //TODO Learning
+                    let vertices = [];
+
+                    var geom = new THREE.Geometry();
+
+                    let ps = [];
+                    let uvs = [];
+                    for(var i=4; i<this.vertexs.length - 4; i++) {
+                       let p = this.vertexs[i];
+                    //   ps = ps.concat([p[0]+1000, p[1],p[2]]);
+                        vertices.push( new THREE.Vector3(p[0], p[1],p[2]));
+                     //   uvs = uvs.concat([p[0], p[1]]);
+                    }
+                    geom.vertices = vertices;
+
+                    //贴图规则：以图形中心为坐标原点
+
+                    geom.faces = [
+                        new THREE.Face3(0,2,1), //反面, 逆时针
+                        new THREE.Face3(2,3,1),
+                        new THREE.Face3(0,1,2), //正面, 顺时针
+                        new THREE.Face3(1,3,2)
+                    ];
+                  //  geom.faces = faces;
+
+                    geom.faceVertexUvs = [[
+                         [new THREE.Vector2(0,1),new THREE.Vector2(0,0),new THREE.Vector2(1,1)],
+                         [new THREE.Vector2(0,0),new THREE.Vector2(1,0),new THREE.Vector2(1,1)],
+                        [new THREE.Vector2(1,1),new THREE.Vector2(0,1),new THREE.Vector2(1,0)],
+                        [new THREE.Vector2(0,1),new THREE.Vector2(0,0),new THREE.Vector2(1,0)]
+                    ]
+                    ];
+
+                    //
+                    // geom.faceUvs = [
+                    // [new THREE.Vector2(1,1),new THREE.Vector2(0,1),new THREE.Vector2(0,0)],
+                    //     [new THREE.Vector2(0,0),new THREE.Vector2(1,0),new THREE.Vector2(1,1)]
+                    //
+                    // ];
+
+                    // geom.uvs = [
+                    //     [new THREE.Vector2(1,1),new THREE.Vector2(0,1),new THREE.Vector2(0,0)],
+                    //     [new THREE.Vector2(0,0),new THREE.Vector2(1,0),new THREE.Vector2(1,1)]
+                    //
+                    // ];
+
+
+
+                   geom.computeFaceNormals();
+                    geom.computeVertexNormals();
+                   geom.computeBoundingSphere();
+
+
+                    let video = document.getElementById('video');
+
+                    let texture = new THREE.VideoTexture(video);
+                    if(Hls.isSupported()) {
+                        var hls = new Hls();
+                        hls.loadSource('http://129.204.12.208:8080/hls/box_5e7c636b731a6725cc81949f-Ao9gFsFx88.m3u8');
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                           setTimeout( e=>{ video.play();}, 1000)
+                        });
+                    }
+                  //  var texture2 = THREE.ImageUtils.loadTexture("./resources/bathroom.jpg");
+                    var texture2 = new THREE.TextureLoader().load( './resources/bathroom.jpg' );
+
+
+                    //纯色面材质
+                    var material2 = new THREE.MeshLambertMaterial({color: 0x00ffff});
+                    // let polygon3D = new THREE.Mesh(geom, material2); //TODO OK
+
+                    //贴图材质
+                    var material = new THREE.MeshBasicMaterial({map: texture});
+                    let polygon3D = new THREE.Mesh(geom, material); //TODO OK
+
+
+
+                    this.scene.add(polygon3D);
+                    console.log('自定义投影面',polygon3D);
+
+                    var material3 = new THREE.MeshBasicMaterial({map: texture});
+                    var planeGeometry = new THREE.PlaneGeometry( 300, 200, 1 );
+                    let plane = new THREE.Mesh(planeGeometry, material3); //TODO OK
+
+                    //
+                    // var geometry = new THREE.PlaneGeometry( 300, 300, 1 );
+                    // let plane = new THREE.Mesh(geometry, material);
+                    plane.position.set(
+                        this.vertexs[5][0]+600,
+                        this.vertexs[5][1],
+                        this.vertexs[5][2]
                         // points[4][0],
                         // points[4][1],
                         // points[4][2]
                     );
-                    this.scene.add(this.cube);
+                    plane.rotation.x = 90 * (2 * Math.PI) / 360;
+                   this.scene.add(plane);
+                   console.log(plane);
+
+                    window.polygon3D = polygon3D;
+                    window.scene = this.scene;
+
+                    // var loader = new THREE.TextureLoader();
+                    // var texture = loader.load( "module/6.png" );
+                    // texture.wrapS = texture.wrapT = THREE.RepeatWrapping;
+                    // texture.repeat.set( 0.008, 0.008 );
+
+                    // var geometry = new THREE.BufferGeometry();
+                    // geometry.attributes.normal = new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1], 3)
+                    // geometry.attributes.position = new THREE.Float32BufferAttribute( [0, 0, 0, 0, 300, 0, 300, 300, 0, 300, 0, 0], 3)
+                    // geometry.attributes.uv = new THREE.Float32BufferAttribute( [0, 0, 0, 300, 300, 300, 300, 0], 2)
+                    // geometry.index = new THREE.Uint16BufferAttribute([1, 0, 3, 3, 2, 1], 1)
+
+                    // var geometry = new THREE.BufferGeometry();
+                    //  geometry.attributes.normal = new THREE.Float32BufferAttribute([0, 0, 1, 0, 0, 1, 0, 0, 1, 0, 0, 1], 3)
+                    // geometry.attributes.position = new THREE.Float32BufferAttribute( ps, 3);
+                    // geometry.attributes.uv = new THREE.Float32BufferAttribute( uvs,2);
+                    // geometry.index = new THREE.Uint16BufferAttribute([0, 3, 1, 3, 2, 1], 1);
+                    //
+                    // var mesh = new THREE.Mesh( geometry, new THREE.MeshPhongMaterial( { side: THREE.DoubleSide, map: texture } ) );
+                    //
+                    // this.scene.add( mesh );
+
+
                 },
+
                 createGeometryByVertices() {
 
                     var resolution = new THREE.Vector2(window.innerWidth, window.innerHeight);
@@ -326,34 +789,65 @@
 
                     var heartShape = new THREE.Shape();
 
-                    heartShape.moveTo( points[1][0], points[1][1] );
+                    heartShape.moveTo( points[0][0], points[0][1] );
+                    heartShape.lineTo( points[1][0], points[1][1] );
                     heartShape.lineTo( points[2][0], points[2][1] );
                     heartShape.lineTo( points[3][0], points[3][1]);
-                    // heartShape.lineTo( this.vertexs[3][0],  this.vertexs[3][1]);
-                    // heartShape.lineTo( x,  y);
-
 
                     var geometry = new THREE.ShapeGeometry( heartShape );
-                    var material = new THREE.MeshBasicMaterial( { color: 0x00ff00 } );
+
+                    // geometry.faceVertexUvs = [
+                    //     [new THREE.Vector2(1,1),new THREE.Vector2(0,1),new THREE.Vector2(0,0)],
+                    //     [new THREE.Vector2(0,0),new THREE.Vector2(1,0),new THREE.Vector2(1,1)]
+                    //
+                    // ];
+
+                    // let video = document.getElementById('video');
+                    // let texture = new THREE.VideoTexture(video);
+                    // var material = new THREE.MeshLambertMaterial({map: texture});
+                    // if(Hls.isSupported()) {
+                    //     var hls = new Hls();
+                    //     hls.loadSource('http://129.204.12.208:8080/hls/box_5e7c636b731a6725cc81949f-Ao9gFsFx88.m3u8');
+                    //     hls.attachMedia(video);
+                    //     hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                    //         video.play();
+                    //     });
+                    // }
+
+                    var material = new THREE.MeshLambertMaterial({color: 0x00ffff});
+
+
                     var mesh = new THREE.Mesh( geometry, material ) ;
-                    // mesh.position.set(
-                    //     this.vertexs[0][0],
-                    //     this.vertexs[0][1],
-                    //     this.vertexs[0][2]
-                    // );
+
                     this.scene.add( mesh );
                 },
 
                 createMesh(geom) {
+                    let video = document.getElementById('video');
+
+                    if(Hls.isSupported()) {
+                        var hls = new Hls();
+                        hls.loadSource('http://203.88.202.230:10001/hls/34020000001320000012_0200000030/34020000001320000012_0200000030_live.m3u8');
+                       // hls.loadSource('http://129.204.12.208:8080/hls/box_5e7c636b731a6725cc81949f-Ao9gFsFx88.m3u8');
+                        hls.attachMedia(video);
+                        hls.on(Hls.Events.MANIFEST_PARSED, function () {
+                            video.play();
+                        });
+                    }
+
+                        let texture = new THREE.VideoTexture(video);
+
+
 
                     var materialArray = [];
-                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
-                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
-                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
-                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0051ba}));
-                    materialArray.push(new THREE.MeshBasicMaterial({color: 0x0031ba}));
-                    // materialArray.push(new THREE.MeshBasicMaterial({map: texture}));
-                    materialArray.push(new THREE.MeshBasicMaterial({color: 0xff51ba}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 'red'}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 'orange'}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 'green'}));
+                    materialArray.push(new THREE.MeshBasicMaterial({map: texture}));
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 'black'}));
+
+                    materialArray.push(new THREE.MeshBasicMaterial({color: 'yellow'}));
+
                     var faceMaterial = new THREE.MeshFaceMaterial(materialArray);
 
 
@@ -393,41 +887,19 @@
 
                     // Projection matrix can be copied directly
                     this.camera.projectionMatrix.fromArray(cam.projectionMatrix);
-                }
+                },
+                _updateObjects(context) {
+                    // if (!this.stop) {
+                    //     this.cube.position.x = this.cube.position.x + 0.1;
+                    //     this.cube.position.y = this.cube.position.y + 0.1;
+                    // }
+                    //
+                    // if (this.cube.position.x > 0) {
+                    //     this.stop = true;
+                    // }
+                },
             });
 
-            view.when(function() {
-                points.forEach(function (p) {
-                    var g= new Graphic({
-                        geometry: {
-                            x: p[0],
-                            y:p[1],
-                            z:0,
-                            type: 'point',
-                            spatialReference: view.spatialReference
-                        },
-                        symbol: getSimpleMarkSymbol()
-                    })
-
-                    view.graphics.add(g);
-
-                })
-                // var g2= new Graphic({
-                //     geometry: {
-                //         x: 0,
-                //         y:0,
-                //         z:0,
-                //         type: 'point',
-                //         spatialReference: view.spatialReference
-                //     },
-                //     symbol: getSimpleMarkSymbol('green')
-                // })
-                // view.graphics.add(g2);
-
-                var myRenderer = new customRenderer();
-                myRenderer.view = view;
-                externalRenderers.add(view, myRenderer);
-            });
         });
     }
 </script>
