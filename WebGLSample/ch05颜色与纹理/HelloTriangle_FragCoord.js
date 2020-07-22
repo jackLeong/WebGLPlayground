@@ -39,6 +39,7 @@ function main() {
     return;
   }
 
+  //gl 在工作时，各寄存器所存的数据，只处于当前的一种工作状态
   // Specify the color for clearing <canvas>
   gl.clearColor(0.0, 0.0, 0.0, 1.0);
 
@@ -46,7 +47,7 @@ function main() {
   gl.clear(gl.COLOR_BUFFER_BIT);
 
   // Draw the rectangle
-  gl.drawArrays(gl.TRIANGLES, 0, n);
+  gl.drawArrays(gl.TRIANGLES, 0, n); //gl.TRIANGLES：绘制方式  n：代表绘制顶点的数量
 }
 
 function initVertexBuffers(gl) {
