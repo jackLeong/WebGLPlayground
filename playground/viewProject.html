@@ -131,11 +131,11 @@
             var view = new SceneView({
                 map: map,
                 container: document.getElementById("viewDiv"),
-                alphaCompositingEnabled: true,
-                viewingMode: "local",
+               alphaCompositingEnabled: true,
+               viewingMode: "local",
                 // clippingArea: extent,
                 // spatialReference: SpatialReference.WebMercator,
-                qualityProfile: "high",
+               qualityProfile: "high",
                 // environment: {
                 //     background: {
                 //         type: "color",
@@ -255,7 +255,6 @@
                 var myRenderer = new customRenderer();
                 myRenderer.view = view;
                 externalRenderers.add(view, myRenderer);
-                window.myRenderer = myRenderer;
                 //TODO OK
                 //  createArcGISPolygon3D();
                 // createMesByPolygon();
@@ -517,7 +516,13 @@
                     // The ArcGIS JS API renders to custom offscreen buffers, and not to the default framebuffers.
                     // We have to inject this bit of code into the three.js runtime in order for it to bind those
                     // buffers instead of the default ones.
-                    //TODO renderer 是three.js 的 渲染器，context是 来自 arcgis的
+                    //TODO
+                    //ArcGIS JS API 使用 自定义的 离屏缓冲区，而不是 WEBGL 默认的帧缓冲区。所以，我们必须 把 离屏的缓冲区位码 注入到 Three.js的运行上下文，目的是为了 Three.js能够绑定使用这些 离屏缓冲区
+                    // ArcGIS API 将 WEBGL 上下文 传过来时，已经将 WEBGL 所有状态设置回 各自的默认值，但有一个例外状态，就是 FrameBUFFER 帧
+                    //缓冲区 还是 绑定使用 ArcGIS 自定义的离屏 缓冲区，因此，它也要求externalRenderer接口用户，在返回ArcGIS API运行状态时，用户要将WEBGL 的状态恢复到原先的状态（即传入setup, render的状态）
+
+                    //在ArcGIS API内部，SceneView 场景 被 在一个中间的渲染目标区内进行渲染，而不是WebGL 上下文指定的默认 framebuffer帧缓冲区。
+
                     var originalSetRenderTarget = this.renderer.setRenderTarget.bind(this.renderer);
                     this.renderer.setRenderTarget = function (target) {
                         originalSetRenderTarget(target);
@@ -531,11 +536,11 @@
                     this.camera = new THREE.PerspectiveCamera();
                     this._createLights();
 
-                    //this._createGraphics();
+                    this._createGraphics();
 
                     this.stop = false;
-                    // cleanup
-                    context.resetWebGLState();
+
+                    context.resetWebGLState(); //setup 执行完成，即返回ArcGIS API 的控制空间，所以要恢复 WebGL 的 状态
                 },
                 render: function(context) {
 
@@ -556,7 +561,7 @@
                     // Immediately request a new redraw
                     externalRenderers.requestRender(this.view);
 
-                    context.resetWebGLState();
+                    context.resetWebGLState(); //render 执行完成，即返回ArcGIS API 的控制空间，所以要恢复 WebGL 的 状态
                 },
                 _createGraphics: function() {
 
@@ -581,7 +586,7 @@
                   //  this.createGeometryByVertices();
 
                      this.createThreeCustomPolygon3D();
-                     this.createBoxGeometry(); //TODO OK
+                  //  this.createBoxGeometry(); //TODO OK
 
                 },
 
@@ -656,7 +661,6 @@
                   //  var texture2 = THREE.ImageUtils.loadTexture("./resources/bathroom.jpg");
                     var texture2 = new THREE.TextureLoader().load( './resources/bathroom.jpg' );
 
-
                     //纯色面材质
                     var material2 = new THREE.MeshLambertMaterial({color: 0x00ffff});
                     // let polygon3D = new THREE.Mesh(geom, material2); //TODO OK
@@ -668,24 +672,16 @@
                     this.scene.add(polygon3D);
                     console.log('自定义投影面',polygon3D);
 
-                    var material3 = new THREE.MeshBasicMaterial({map: texture});
-                    var planeGeometry = new THREE.PlaneGeometry( 300, 200, 1 );
+                    var material3 = new THREE.MeshBasicMaterial({color: 'white'});
+                    var planeGeometry = new THREE.PlaneGeometry( 1, 1, 1 );
                     let plane = new THREE.Mesh(planeGeometry, material3); //TODO OK
-
-                    //
-                    // var geometry = new THREE.PlaneGeometry( 300, 300, 1 );
-                    // let plane = new THREE.Mesh(geometry, material);
                     plane.position.set(
-                        this.vertexs[5][0]+600,
-                        this.vertexs[5][1],
-                        this.vertexs[5][2]
-                        // points[4][0],
-                        // points[4][1],
-                        // points[4][2]
+                        this.vertexs[4][0],
+                        this.vertexs[4][1],
+                        this.vertexs[4][2]
                     );
-                    plane.rotation.x = 90 * (2 * Math.PI) / 360;
                    this.scene.add(plane);
-                   console.log(plane);
+
 
                     window.polygon3D = polygon3D;
                     window.scene = this.scene;
